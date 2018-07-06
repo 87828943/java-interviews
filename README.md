@@ -1,2 +1,1 @@
-# java-xminds
-xminds
+# java-interviews
