@@ -1,19 +1,19 @@
-﻿#redis:
+#redis:
 
 ## 介绍
-	> key-value nosql非关系型数据库 单线程，c语言开发，效率高(完全基于内存，非阻塞IO，大部分命令时间复杂度都是O(1)所以速度快)
-	> 因为是单线程，时间复杂度为 O(N) 的 KEYS 命令，严格禁止在生产环境中使用！
+> key-value nosql非关系型数据库 单线程，c语言开发，效率高(完全基于内存，非阻塞IO，大部分命令时间复杂度都是O(1)所以速度快)
+> 因为是单线程，时间复杂度为 O(N) 的 KEYS 命令，严格禁止在生产环境中使用！
 ## Key
-	1. 不要使用过长的Key。例如使用一个1024字节的key就不是一个好主意，不仅会消耗更多的内存，还会导致查找的效率降低
-	2. Key短到缺失了可读性也是不好的，例如”u1000flw”比起”user:1000:followers”来说，节省了寥寥的存储空间，却引发了可读性和可维护性上的麻烦
-	3. 最好使用统一的规范来设计Key，比如”object-type:id:attr”，以这一规范设计出的Key可能是”user:1000″或”comment:1234:reply-to”
-	4. Redis允许的最大Key长度是512MB（对Value的长度限制也是512MB）
+1. 不要使用过长的Key。例如使用一个1024字节的key就不是一个好主意，不仅会消耗更多的内存，还会导致查找的效率降低
+2. Key短到缺失了可读性也是不好的，例如”u1000flw”比起”user:1000:followers”来说，节省了寥寥的存储空间，却引发了可读性和可维护性上的麻烦
+3. 最好使用统一的规范来设计Key，比如”object-type:id:attr”，以这一规范设计出的Key可能是”user:1000″或”comment:1234:reply-to”
+4. Redis允许的最大Key长度是512MB（对Value的长度限制也是512MB）
 ## 基本数据类型常用五种
-	1. String 是Redis的基础数据类型，Redis没有Int、Float、Boolean等数据类型的概念，所有的基本类型在Redis中都以String体现。
-	2. List 注意：链表结构，Redis的List实际是设计来用于实现队列，而不是用于实现类似ArrayList这样的列表的。如果你不是想要实现一个双端出入的队列，那么请尽量不要使用Redis的List数据结构。
-	3. Hash 理解成java的hashMap，存储对象比较实用，可以实现二元查找，如”查找ID为1000的用户的年龄”。比起将整个对象序列化后作为String存储的方法，Hash能够有效地减少网络传输的消耗
-	4. Set 是无序的，不可重复的String集合。
-	5. Sorted Set 是有序的、不可重复的String集合。Sorted Set中的每个元素都需要指派一个分数(score)，Sorted Set会根据score对元素进行升序排序。如果多个member拥有相同的score，则以字典序进行升序排序。Sorted Set非常适合用于实现排名。
+1. String 是Redis的基础数据类型，Redis没有Int、Float、Boolean等数据类型的概念，所有的基本类型在Redis中都以String体现。
+2. List 注意：链表结构，Redis的List实际是设计来用于实现队列，而不是用于实现类似ArrayList这样的列表的。如果你不是想要实现一个双端出入的队列，那么请尽量不要使用Redis的List数据结构。
+3. Hash 理解成java的hashMap，存储对象比较实用，可以实现二元查找，如”查找ID为1000的用户的年龄”。比起将整个对象序列化后作为String存储的方法，Hash能够有效地减少网络传输的消耗
+4. Set 是无序的，不可重复的String集合。
+5. Sorted Set 是有序的、不可重复的String集合。Sorted Set中的每个元素都需要指派一个分数(score)，Sorted Set会根据score对元素进行升序排序。如果多个member拥有相同的score，则以字典序进行升序排序。Sorted Set非常适合用于实现排名。
 ## 数据持久化
 	生产开启两种措施，RDB默认开启，AOP 配置文件：appendonly yes 开启
 	### RDB（执行时间间隔生成rdb快照）
