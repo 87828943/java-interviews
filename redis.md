@@ -2,14 +2,13 @@
 
 ## 介绍
 
-> key-value nosql非关系型数据库 单线程，c语言开发，效率高(完全基于内存，非阻塞IO，大部分命令时间复杂度都是O(1)所以速度快)
-> 因为是单线程，时间复杂度为 O(N) 的 KEYS 命令，严格禁止在生产环境中使用！
+> key-value nosql非关系型数据库 单线程，c语言开发，效率高(完全基于内存，非阻塞IO，大部分命令时间复杂度都是O(1)所以速度快)。因为是单线程，时间复杂度为 O(N) 的 KEYS 命令，严格禁止在生产环境中使用！
 
 ## Key
 
 1. 不要使用过长的Key。例如使用一个1024字节的key就不是一个好主意，不仅会消耗更多的内存，还会导致查找的效率降低
-2. Key短到缺失了可读性也是不好的，例如”u1000flw”比起”user:1000:followers”来说，节省了寥寥的存储空间，却引发了可读性和可维护性上的麻烦
-3. 最好使用统一的规范来设计Key，比如”object-type:id:attr”，以这一规范设计出的Key可能是”user:1000″或”comment:1234:reply-to”
+2. Key短到缺失了可读性也是不好的，例如u1000flw比起user:1000:followers来说，节省了寥寥的存储空间，却引发了可读性和可维护性上的麻烦
+3. 最好使用统一的规范来设计Key，比如object-type:id:attr，以这一规范设计出的Key可能是user:1000或comment:1234:reply-to
 4. Redis允许的最大Key长度是512MB（对Value的长度限制也是512MB）
 
 ## 基本数据类型常用五种
@@ -27,7 +26,9 @@
 ### RDB（执行时间间隔生成rdb快照）
 
 采用RDB持久方式，Redis会定期保存数据快照至一个rbd文件中，并在启动时自动加载rdb文件，恢复之前保存的数据。可以在配置文件中配置Redis进行快照保存的时机：
+
 > save [seconds] [changes]
+
 意为在[seconds]秒内如果发生了[changes]次数据修改，则进行一次RDB快照保存
 
 优点：
@@ -42,19 +43,20 @@
 ### AOF（把每一个写请求都记录在一个日志文件里）
 
 AOF提供了三种fsync配置，always/everysec/no，通过配置项[appendfsync]指定：
-1. appendfsync no：不进行fsync，将flush文件的时机交给OS决定，速度最快
-2. appendfsync always：每写入一条日志就进行一次fsync操作，数据安全性最高，但速度最慢
-3. appendfsync everysec：折中的做法，交由后台线程每秒fsync一次
+
+	1. appendfsync no：不进行fsync，将flush文件的时机交给OS决定，速度最快
+	2. appendfsync always：每写入一条日志就进行一次fsync操作，数据安全性最高，但速度最慢
+	3. appendfsync everysec：折中的做法，交由后台线程每秒fsync一次
 
 优点：
-1. 最安全，在启用appendfsync always时，任何已写入的数据都不会丢失，使用在启用appendfsync everysec也至多只会丢失1秒的数据。
-2. AOF文件在发生断电等问题时也不会损坏，即使出现了某条日志只写入了一半的情况，也可以使用redis-check-aof工具轻松修复。
-3. AOF文件易读，可修改，在进行了某些错误的数据清除操作后，只要AOF文件没有rewrite，就可以把AOF文件备份出来，把错误的命令删除，然后恢复数据。
+	1. 最安全，在启用appendfsync always时，任何已写入的数据都不会丢失，使用在启用appendfsync everysec也至多只会丢失1秒的数据。
+	2. AOF文件在发生断电等问题时也不会损坏，即使出现了某条日志只写入了一半的情况，也可以使用redis-check-aof工具轻松修复。
+	3. AOF文件易读，可修改，在进行了某些错误的数据清除操作后，只要AOF文件没有rewrite，就可以把AOF文件备份出来，把错误的命令删除，然后恢复数据。
 
 缺点：
-1. AOF文件通常比RDB文件更大
-2. 性能消耗比RDB高
-3. 数据恢复速度比RDB慢
+	1. AOF文件通常比RDB文件更大
+	2. 性能消耗比RDB高
+	3. 数据恢复速度比RDB慢
 	
 ## 架构演变集群高可用方案（延伸扩展问题等）
 
@@ -71,8 +73,10 @@ AOF提供了三种fsync配置，always/everysec/no，通过配置项[appendfsync
 通过如下配置控制Redis使用的最大内存：
 maxmemory 100mb
 在内存占用达到了maxmemory后，再向Redis写入数据时，Redis会：
-1. 根据配置的数据淘汰策略尝试淘汰数据，释放空间
-2. 如果没有数据可以淘汰，或者没有配置数据淘汰策略，那么Redis会对所有写请求返回错误，但读请求仍然可以正常执行
+
+	1. 根据配置的数据淘汰策略尝试淘汰数据，释放空间
+	2. 如果没有数据可以淘汰，或者没有配置数据淘汰策略，那么Redis会对所有写请求返回错误，但读请求仍然可以正常执行
+
 在为Redis设置maxmemory时，需要注意：
 如果采用了Redis的主从同步，主节点向从节点同步数据时，会占用掉一部分内存空间，如果maxmemory过于接近主机的可用内存，导致数据同步时内存不足。所以设置的maxmemory不要过于接近主机可用的内存，留出一部分预留用作主从同步。
 
@@ -80,11 +84,11 @@ maxmemory 100mb
 
 Redis提供了5种数据淘汰策略：
 
-1. volatile-lru：使用LRU算法进行数据淘汰（淘汰上次使用时间最早的，且使用次数最少的key），只淘汰设定了有效期的key
-2. volatile-random：随机淘汰数据，只淘汰设定了有效期的key
-3. allkeys-lru：使用LRU算法进行数据淘汰，所有的key都可以被淘汰
-4. allkeys-random：随机淘汰数据，所有的key都可以被淘汰
-5. volatile-ttl：淘汰剩余有效期最短的key
+	1. volatile-lru：使用LRU算法进行数据淘汰（淘汰上次使用时间最早的，且使用次数最少的key），只淘汰设定了有效期的key
+	2. volatile-random：随机淘汰数据，只淘汰设定了有效期的key
+	3. allkeys-lru：使用LRU算法进行数据淘汰，所有的key都可以被淘汰
+	4. allkeys-random：随机淘汰数据，所有的key都可以被淘汰
+	5. volatile-ttl：淘汰剩余有效期最短的key
 
 最好为Redis指定一种有效的数据淘汰策略以配合maxmemory设置，避免在内存使用满后发生写入失败的情况。
 一般来说，推荐使用的策略是volatile-lru，并辨识Redis中保存的数据的重要性。
