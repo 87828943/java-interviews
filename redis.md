@@ -1,4 +1,4 @@
-title: redis
+title: Redis
 date: 2019-01-05
 tags: [redis]
 ---
